@@ -1,0 +1,20 @@
+Package: FishRepro
+Title: Simulate and analyze fish reproduction data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Nikolai",
+           family = "Klibansky",
+           role = c("aut", "cre"),
+           email = "nikolai.klibansky@noaa.gov",
+           comment = c(ORCID = "0000-0003-2025-5089"))
+Description: This package provides functions which allow the user to simulate spawning populations of fish, field sampling to collect biological samples and data, and statistical analysis of reproductive data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+	msm,
+    stringr
+Depends: 
+    R (>= 3.5)
+LazyData: true
