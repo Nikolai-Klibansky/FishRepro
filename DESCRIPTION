@@ -18,3 +18,5 @@ Imports:
 Depends: 
     R (>= 3.5)
 LazyData: true
+URL: https://github.com/Nikolai-Klibansky/FishRepro
+BugReports: https://github.com/Nikolai-Klibansky/FishRepro/issues
