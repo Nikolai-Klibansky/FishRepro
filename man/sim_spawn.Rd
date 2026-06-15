@@ -138,7 +138,7 @@ sim_spawn(
 \item{BI_size_independent}{Should batch interval be independent of body size?}
 }
 \description{
-Simulate a spawning population of fish to generate fecundity data.
+Simulate a spawning population of fish to generate fecundity data. NOTE FUNCTION UNDER CONSTRUCTION!!!
 }
 \examples{
 \dontrun{
@@ -149,3 +149,4 @@ Simulate a spawning population of fish to generate fecundity data.
 \author{
 Nikolai Klibansky
 }
+\keyword{internal}
