@@ -36,7 +36,7 @@
 #'       col=cols["HO"],
 #'  )
 #'
-#'  fit <- fit_pla_msd(x,HO)
+#'  fit <- fit_pla_msd(hour,HO)
 #'  curve(expr=do.call(pla_msd,c(list(x=x),as.list(fit$par))),
 #'        add=TRUE,lwd=2,lty=1,col=cols["HO"])
 #'  legend("topright",legend=c("observed","predicted"),
@@ -172,7 +172,7 @@
 #'         y0=CI[1,],y1=CI[2,],
 #'         code=3,length=0.05,angle=90,col=cols["HO"])
 #'
-#'  fit <- fit_pla_msd(x,HO)
+#'  fit <- fit_pla_msd(hour,HO)
 #'  curve(expr=do.call(pla_msd,c(list(x=x),as.list(fit$par))),
 #'        add=TRUE,lwd=2,lty=1,col=cols["HO"])
 #'  legend("topleft",legend=c("observed HO","predicted HO"),
