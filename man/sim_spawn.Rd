@@ -5,41 +5,41 @@
 \title{Simulate a spawning population of fish}
 \usage{
 sim_spawn(
+  d_sim = 365,
   Linf = 911.36,
   K = 0.24,
   t0 = -0.33,
   Lmin = 200,
   Lbinw = 20,
   a50 = 2,
-  a_lw = 1.65e-05,
-  b_lw = 2.99,
-  d_sim = 365,
-  j.mn.SI = 156,
-  j.sd.SI = 38.62560942,
-  Ps.mn = 0.389112903,
-  Ps.m = 580.1673777,
-  Ps.s = 66.92958968,
-  Ps.a = 0.606122263,
-  Ps.f = 0.213780242,
-  d.mn.Sn = 78,
-  h.mn.HO = 10.19994175,
-  h.sd.HO = 1.770091189,
-  h.mn.spn = 16.38637712,
-  h.sd.spn = 4.863383191,
-  d.mn.HO = 6,
-  d.mn.PF = 8,
-  SI.dur = 14,
-  SI_cf = 1.714285714,
-  fb.a = 0.407975854,
-  fb.b = 3.03e-08,
-  fb.c = 4.774001527,
-  fb.k = 2.618605045,
-  fb.thresh = 375,
-  fb.min = 58935,
-  Sn0.m = 4,
-  Sn0.d = 1,
-  Sn1.m = 10,
-  Sn1.d = 31,
+  lw_a = 1.65e-05,
+  lw_b = 2.99,
+  doy_SI_mn = 156,
+  doy_SI_sd = 38.62560942,
+  Ps_mn = 0.389112903,
+  Ps_m = 580.1673777,
+  Ps_s = 66.92958968,
+  Ps_a = 0.606122263,
+  Ps_f = 0.213780242,
+  dd_Sn_mn = 78,
+  h_HO_mn = 10.19994175,
+  h_HO_sd = 1.770091189,
+  h_spn_mn = 16.38637712,
+  h_spn_sd = 4.863383191,
+  dh_HO_mn = 6,
+  dh_PF_mn = 8,
+  dh_SI_mn = 14,
+  cf_SI = 1.714285714,
+  fb_a = 0.407975854,
+  fb_b = 3.03e-08,
+  fb_c = 4.774001527,
+  fb_k = 2.618605045,
+  fb_thresh = 375,
+  fb_min = 58935,
+  mon_Sn_beg = 4,
+  day_Sn_beg = 1,
+  mon_Sn_end = 10,
+  day_Sn_end = 31,
   nm_fn_fb = "pow3",
   first_batch_error = TRUE,
   diel_spawn_error = TRUE,
@@ -51,6 +51,8 @@ sim_spawn(
 )
 }
 \arguments{
+\item{d_sim}{number of days in the simulation}
+
 \item{Linf}{length infinity}
 
 \item{K}{growth coefficient}
@@ -63,63 +65,61 @@ sim_spawn(
 
 \item{a50}{Age at maturity using knife edge maturity function (analogous to age at 50 percent maturity from logistic function)}
 
-\item{a_lw}{a parameter in length weight equation (W = aL^b)}
+\item{lw_a}{a parameter in length weight equation (W = aL^b)}
 
-\item{b_lw}{b parameter in length weight equation (W = aL^b)}
+\item{lw_b}{b parameter in length weight equation (W = aL^b)}
 
-\item{d_sim}{number of days in the simulation}
+\item{doy_SI_mn}{Mean appearance of spawning markers during the year (day of year)}
 
-\item{j.mn.SI}{Mean appearance of spawning markers during the year (Julian day)}
+\item{doy_SI_sd}{StDev appearance of spawning markers during the year (day of year)}
 
-\item{j.sd.SI}{StDev appearance of spawning markers during the year (Julian day)}
+\item{Ps_mn}{Mean (size-independent) spawning fraction}
 
-\item{Ps.mn}{Mean (size-independent) spawning fraction}
+\item{Ps_m}{spawning fraction~length parameter m (point of inflection)}
 
-\item{Ps.m}{spawning fraction~length parameter m (point of inflection)}
+\item{Ps_s}{spawning fraction~length parameter s (scale parameter)}
 
-\item{Ps.s}{spawning fraction~length parameter s (scale parameter)}
+\item{Ps_a}{spawning fraction~length parameter a (upper asymptote)}
 
-\item{Ps.a}{spawning fraction~length parameter a (upper asymptote)}
+\item{Ps_f}{spawning fraction~length parameter f ( lower asymptote (i.e. floor))}
 
-\item{Ps.f}{spawning fraction~length parameter f ( lower asymptote (i.e. floor))}
+\item{dd_Sn_mn}{Mean duration of spawning period (days)}
 
-\item{d.mn.Sn}{Mean duration of spawning period (days)}
+\item{h_HO_mn}{Mean time (hour of the day) that HO become evident}
 
-\item{h.mn.HO}{Mean time (hour of the day) that HO become evident}
+\item{h_HO_sd}{StDev time (hour of the day) that HO become evident}
 
-\item{h.sd.HO}{StDev time (hour of the day) that HO become evident}
+\item{h_spn_mn}{Mean time (hour of the day) that females spawn (POF become evident)}
 
-\item{h.mn.spn}{Mean time (hour of the day) that females spawn (POF become evident)}
+\item{h_spn_sd}{StDev time (hour of the day) that females spawn (POF become evident)}
 
-\item{h.sd.spn}{StDev time (hour of the day) that females spawn (POF become evident)}
+\item{dh_HO_mn}{mean duration of hydrated oocytes (in hours)}
 
-\item{d.mn.HO}{mean duration of hydrated oocytes (in hours)}
+\item{dh_PF_mn}{mean duration in hours of post ovulatory follicles (in hours)}
 
-\item{d.mn.PF}{mean duration in hours of post ovulatory follicles (in hours)}
+\item{dh_SI_mn}{mean duration of spawning indicators (in hours), used when spawning indicator is the union of two events (i.e. SI presence = presence of either HO or POF)}
 
-\item{SI.dur}{mean duration of spawning indicators (in hours), used when spawning indicator is the union of two events (i.e. SI presence = presence of either HO or POF)}
+\item{cf_SI}{spawning indicator correction factor: 24/dh_SI_mn}
 
-\item{SI_cf}{spawning indicator correction factor: 24/SI.dur}
+\item{fb_a}{Batch fecundity-length intercept parameter}
 
-\item{fb.a}{Batch fecundity-length intercept parameter}
+\item{fb_b}{Batch fecundity-length coefficient parameter}
 
-\item{fb.b}{Batch fecundity-length coefficient parameter}
+\item{fb_c}{Batch fecundity-length exponent parameter}
 
-\item{fb.c}{Batch fecundity-length exponent parameter}
+\item{fb_k}{Batch fecundity-length k parameter for negative binomial error distribution}
 
-\item{fb.k}{Batch fecundity-length k parameter for negative binomial error distribution}
+\item{fb_thresh}{Threshold length (TL mm), below which fecundity is fixed at the observed value}
 
-\item{fb.thresh}{Threshold length (TL mm), below which fecundity is fixed at the observed value}
+\item{fb_min}{Fecundity (observed) for fish < threshold length}
 
-\item{fb.min}{Fecundity (observed) for fish < threshold length}
+\item{mon_Sn_beg}{Start of known spawning season: month}
 
-\item{Sn0.m}{Start of known spawning season: month}
+\item{day_Sn_beg}{Start of known spawning season: day}
 
-\item{Sn0.d}{Start of known spawning season: day}
+\item{mon_Sn_end}{End of known spawning season: month}
 
-\item{Sn1.m}{End of known spawning season: month}
-
-\item{Sn1.d}{End of known spawning season: day}
+\item{day_Sn_end}{End of known spawning season: day}
 
 \item{nm_fn_fb}{Name of function used to compute batch fecundity}
 
@@ -142,11 +142,25 @@ Simulate a spawning population of fish to generate fecundity data. NOTE FUNCTION
 }
 \examples{
 \dontrun{
-# Write example here
+# Simulate spawning with defaults
+set.seed(23456)
+out_spawn <- sim_spawn()
+
+# Set dh_HO and dh_PF to match values in \code{sim_spawn}
+par(mfrow=c(2,1),mar=c(3,3,1,1),mgp=c(1,0.2,0),tck=-0.01)
+plot_spawn(data_pop=  out_spawn$data_pop,
+           time_unit = "month",
+           dh_HO = 6,
+           dh_PF = 8
+)
+plot_spawn(data_pop=out_spawn$data_pop,
+           time_unit = "hour",
+           dh_HO = 6,
+           dh_PF = 8,
+           nm_trt_plot  = c("Bs","HO","PF"))
 }
 
 }
 \author{
 Nikolai Klibansky
 }
-\keyword{internal}

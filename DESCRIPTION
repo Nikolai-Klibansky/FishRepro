@@ -11,7 +11,6 @@ Description: This package provides functions which allow the user to simulate sp
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports:
 	msm,
     stringr
@@ -20,3 +19,4 @@ Depends:
 LazyData: true
 URL: https://github.com/Nikolai-Klibansky/FishRepro
 BugReports: https://github.com/Nikolai-Klibansky/FishRepro/issues
+Config/roxygen2/version: 8.0.0

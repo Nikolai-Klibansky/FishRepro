@@ -8,34 +8,34 @@
 #' @param Lmin minimum length of fish (same units as Linf)
 #' @param Lbinw width of length bins (same units as Linf)
 #' @param a50 Age at maturity using knife edge maturity function (analogous to age at 50 percent maturity from logistic function)
-#' @param a_lw a parameter in length weight equation (W = aL^b)
-#' @param b_lw b parameter in length weight equation (W = aL^b)
-#' @param j.mn.SI Mean appearance of spawning markers during the year (Julian day)
-#' @param j.sd.SI StDev appearance of spawning markers during the year (Julian day)
-#' @param Ps.mn Mean (size-independent) spawning fraction
-#' @param Ps.m spawning fraction~length parameter m (point of inflection)
-#' @param Ps.s spawning fraction~length parameter s (scale parameter)
-#' @param Ps.a spawning fraction~length parameter a (upper asymptote)
-#' @param Ps.f spawning fraction~length parameter f ( lower asymptote (i.e. floor))
-#' @param d.mn.Sn Mean duration of spawning period (days)
-#' @param h.mn.HO Mean time (hour of the day) that HO become evident
-#' @param h.sd.HO StDev time (hour of the day) that HO become evident
-#' @param h.mn.spn Mean time (hour of the day) that females spawn (POF become evident)
-#' @param h.sd.spn StDev time (hour of the day) that females spawn (POF become evident)
-#' @param d.mn.HO mean duration of hydrated oocytes (in hours)
-#' @param d.mn.PF mean duration in hours of post ovulatory follicles (in hours)
-#' @param SI.dur mean duration of spawning indicators (in hours), used when spawning indicator is the union of two events (i.e. SI presence = presence of either HO or POF)
-#' @param SI_cf spawning indicator correction factor: 24/SI.dur
-#' @param fb.a Batch fecundity-length intercept parameter
-#' @param fb.b Batch fecundity-length coefficient parameter
-#' @param fb.c Batch fecundity-length exponent parameter
-#' @param fb.k Batch fecundity-length k parameter for negative binomial error distribution
-#' @param fb.thresh Threshold length (TL mm), below which fecundity is fixed at the observed value
-#' @param fb.min Fecundity (observed) for fish < threshold length
-#' @param Sn0.m Start of known spawning season: month
-#' @param Sn0.d Start of known spawning season: day
-#' @param Sn1.m End of known spawning season: month
-#' @param Sn1.d End of known spawning season: day
+#' @param lw_a a parameter in length weight equation (W = aL^b)
+#' @param lw_b b parameter in length weight equation (W = aL^b)
+#' @param doy_SI_mn Mean appearance of spawning markers during the year (day of year)
+#' @param doy_SI_sd StDev appearance of spawning markers during the year (day of year)
+#' @param Ps_mn Mean (size-independent) spawning fraction
+#' @param Ps_m spawning fraction~length parameter m (point of inflection)
+#' @param Ps_s spawning fraction~length parameter s (scale parameter)
+#' @param Ps_a spawning fraction~length parameter a (upper asymptote)
+#' @param Ps_f spawning fraction~length parameter f ( lower asymptote (i.e. floor))
+#' @param dd_Sn_mn Mean duration of spawning period (days)
+#' @param h_HO_mn Mean time (hour of the day) that HO become evident
+#' @param h_HO_sd StDev time (hour of the day) that HO become evident
+#' @param h_spn_mn Mean time (hour of the day) that females spawn (POF become evident)
+#' @param h_spn_sd StDev time (hour of the day) that females spawn (POF become evident)
+#' @param dh_HO_mn mean duration of hydrated oocytes (in hours)
+#' @param dh_PF_mn mean duration in hours of post ovulatory follicles (in hours)
+#' @param dh_SI_mn mean duration of spawning indicators (in hours), used when spawning indicator is the union of two events (i.e. SI presence = presence of either HO or POF)
+#' @param cf_SI spawning indicator correction factor: 24/dh_SI_mn
+#' @param fb_a Batch fecundity-length intercept parameter
+#' @param fb_b Batch fecundity-length coefficient parameter
+#' @param fb_c Batch fecundity-length exponent parameter
+#' @param fb_k Batch fecundity-length k parameter for negative binomial error distribution
+#' @param fb_thresh Threshold length (TL mm), below which fecundity is fixed at the observed value
+#' @param fb_min Fecundity (observed) for fish < threshold length
+#' @param mon_Sn_beg Start of known spawning season: month
+#' @param day_Sn_beg Start of known spawning season: day
+#' @param mon_Sn_end End of known spawning season: month
+#' @param day_Sn_end End of known spawning season: day
 #' @param nm_fn_fb Name of function used to compute batch fecundity
 #' @param first_batch_error Include an error distribution around the date that the first batch of the season is spawned?
 #' @param diel_spawn_error  Include an error distribution around the time of day that batches are spawned?
@@ -48,16 +48,22 @@
 #' @export
 #' @examples
 #' \dontrun{
-# Simulate spawning with defaults
-out <- sim_spawn()
-# plot results
-# default durations of HO and POF do not match the durations used in \code{sim_spawn}
-plot_spawn(data_pop=out$D.pop)
-
-# Set dur_HO and dur_PF to match values in \code{sim_spawn}
-plot_spawn(data_pop=out$D.pop,
-           dur_HO = 6,
-           dur_PF = 8)
+#' # Simulate spawning with defaults
+#' set.seed(23456)
+#' out_spawn <- sim_spawn()
+#'
+#' # Set dh_HO and dh_PF to match values in \code{sim_spawn}
+#' par(mfrow=c(2,1),mar=c(3,3,1,1),mgp=c(1,0.2,0),tck=-0.01)
+#' plot_spawn(data_pop=  out_spawn$data_pop,
+#'            time_unit = "month",
+#'            dh_HO = 6,
+#'            dh_PF = 8
+#' )
+#' plot_spawn(data_pop=out_spawn$data_pop,
+#'            time_unit = "hour",
+#'            dh_HO = 6,
+#'            dh_PF = 8,
+#'            nm_trt_plot  = c("Bs","HO","PF"))
 #'}
 #'
 sim_spawn <- function(d_sim=365,
@@ -67,34 +73,34 @@ sim_spawn <- function(d_sim=365,
                       Lmin=200,
                       Lbinw=20,
                       a50=2,
-                      a_lw=0.0000165,
-                      b_lw=2.99,
-                      j.mn.SI=156,
-                      j.sd.SI=38.62560942,
-                      Ps.mn=0.389112903,
-                      Ps.m=580.1673777,
-                      Ps.s=66.92958968,
-                      Ps.a=0.606122263,
-                      Ps.f=0.213780242,
-                      d.mn.Sn=78,
-                      h.mn.HO=10.19994175,
-                      h.sd.HO=1.770091189,
-                      h.mn.spn=16.38637712,
-                      h.sd.spn=4.863383191,
-                      d.mn.HO=6,
-                      d.mn.PF=8,
-                      SI.dur=14,
-                      SI_cf=1.714285714,
-                      fb.a=0.407975854,
-                      fb.b=3.03E-08,
-                      fb.c=4.774001527,
-                      fb.k=2.618605045,
-                      fb.thresh=375,
-                      fb.min=58935,
-                      Sn0.m=4,
-                      Sn0.d=1,
-                      Sn1.m=10,
-                      Sn1.d=31,
+                      lw_a=0.0000165,
+                      lw_b=2.99,
+                      doy_SI_mn=156,
+                      doy_SI_sd=38.62560942,
+                      Ps_mn=0.389112903,
+                      Ps_m=580.1673777,
+                      Ps_s=66.92958968,
+                      Ps_a=0.606122263,
+                      Ps_f=0.213780242,
+                      dd_Sn_mn=78,
+                      h_HO_mn=10.19994175,
+                      h_HO_sd=1.770091189,
+                      h_spn_mn=16.38637712,
+                      h_spn_sd=4.863383191,
+                      dh_HO_mn=6,
+                      dh_PF_mn=8,
+                      dh_SI_mn=14,
+                      cf_SI=1.714285714,
+                      fb_a=0.407975854,
+                      fb_b=3.03E-08,
+                      fb_c=4.774001527,
+                      fb_k=2.618605045,
+                      fb_thresh=375,
+                      fb_min=58935,
+                      mon_Sn_beg=4,
+                      day_Sn_beg=1,
+                      mon_Sn_end=10,
+                      day_Sn_end=31,
                       nm_fn_fb="pow3",
                       first_batch_error=TRUE,
                       diel_spawn_error=TRUE,
@@ -109,39 +115,32 @@ sim_spawn <- function(d_sim=365,
   Lfmax <- floorf(Linf,Lbinw)         # Female length: maximum
   Lbin <- seq(Lmin,Lfmax, by=Lbinw)    # Female length bins
 
-  n_Lbin <- length(Lbin)                                         # Number of female length bins
-  size.class <- paste("f",sprintf("%02d", 1:n_Lbin),sep=".")  # Names of length bins
-  a_f <- vb_age(L=Lbin,Linf=Linf,K=K,t0=t0)                      # Age of females as a VB function of L
+  n_Lbin <- length(Lbin)                                       # Number of female length bins
+  ID <- sprintf("%02d", 1:n_Lbin)                              # Fish ID based on name of length bin (formerly size.class)
+  a_f <- vb_age(L=Lbin,Linf=Linf,K=K,t0=t0)                    # Age of females as a VB function of L
   L50 <- vb_len(a=a50,Linf=Linf,K=K,t0=t0)                     # Female length: at maturity
 
   Lbin_imm <- Lbin[Lbin<L50]                          # Immature female length bins
   Lbin_mat <- Lbin[Lbin>=L50]                         # Mature female length bins
   fm <- c(rep(0,length(Lbin_imm)),rep(1,length(Lbin_mat))) # Female maturity status by length bin
-  W.f <- a_lw*Lbin^b_lw                   # W in grams
+  W.f <- lw_a*Lbin^lw_b                   # W in grams
   P.fm.L <- (Lbin>=L50)*1                 # Proportion of females that are mature by length bin
   P.fm.a <- P.fm.L                        # Proportion of females that are mature by age bin
   P.fm <- sum(P.fm.L)/n_Lbin              # Proportion of all females that are mature
 
   # Model structure
   h_sim <- 24*d_sim        # number of hours in simulation
-  t_sim <- 1:h_sim   # Time points in simulation (in hours)
-  POSIX.t <- as.POSIXct(x=(0:(h_sim-1))*3600,origin="1970-01-01",tz="UTC") # Time points in simulation (in POSIX date and hour)
+  t_sim <- 1:h_sim   # time points in simulation (in hours)
+  POSIX.t <- as.POSIXct(x=(0:(h_sim-1))*3600,origin="1970-01-01",tz="UTC") # time points in simulation (in POSIX date and hour)
 
   # Start and end of spawning season in POSIX-time (rounded to whole day units)
-  #   (NOTE: The endpoints of the spawning season here are effectively modeled as
-  #    environmental traits.  In the spawner model, fish respond to these traits
-  #    and begin or end spawning activity for the year.)
-  # Expected (i.e. "known spawning season")
-  POSIX.Sn0.kss <- as.POSIXct(x=paste("1970",Sn0.m,Sn0.d,sep="-"),tz="UTC")  # Start
-  POSIX.Sn1.kss <- as.POSIXct(x=paste("1970",Sn1.m,Sn1.d,sep="-"),tz="UTC")  # End
-
   # True
-  POSIX.Sn0 <- as.POSIXct(x=paste("1970",Sn0.m,Sn0.d,sep="-"),tz="UTC") # Start
-  POSIX.Sn1 <- as.POSIXct(x=paste("1970",Sn1.m,Sn1.d,sep="-"),tz="UTC") # End
+  POSIX_Sn_beg <- as.POSIXct(x=paste("1970",mon_Sn_beg,day_Sn_beg,sep="-"),tz="UTC") # Start
+  POSIX_Sn_end <- as.POSIXct(x=paste("1970",mon_Sn_end,day_Sn_end,sep="-"),tz="UTC") # End
 
   # Start and end time of spawning season (midnight on first day) in hour of the year units
-  t.Sn0 <- (as.numeric(POSIX.Sn0)/3600)+1     # start
-  t.Sn1 <- (as.numeric(POSIX.Sn1)/3600)+1     # end
+  t_Sn_beg <- (as.numeric(POSIX_Sn_beg)/3600)+1     # start
+  t_Sn_end <- (as.numeric(POSIX_Sn_end)/3600)+1     # end
 
   # Initialize vectors
   ord.day <- floor((t_sim-1)/24) # Ordinal (Julian) day at each time point
@@ -150,12 +149,12 @@ sim_spawn <- function(d_sim=365,
   P.PF <- rep(x=0,times=h_sim)  # Proportion of females with PF at each time point
 
   # Oocyte maturation timeline
-  #   h.mn.HO=  h.mn.HO             # mean time (hour of the day) that HO become evident
+  #   h_HO_mn=  h_HO_mn             # mean time (hour of the day) that HO become evident
 
   # mean duration in hours for..
-  #      d.mn.HO= d.mn.HO    # HO
-  #      d.mn.PF= d.mn.PF    # PF
-  #      d.mn.BI= d.mn.BI.B0*Lbin^d.mn.BI.B1 # Batch interval (days between initiation of batches)
+  #      dh_HO_mn= dh_HO_mn    # HO
+  #      dh_PF_mn= dh_PF_mn    # PF
+  #      d_BI_mn= d_BI_mn.B0*Lbin^d_BI_mn.B1 # Batch interval (days between initiation of batches)
 
   # Deterministic batch fecundity function
   fn_fb <- get(nm_fn_fb)
@@ -166,39 +165,39 @@ sim_spawn <- function(d_sim=365,
   ov_empty <- matrix(data=0,
                      nrow=n_Lbin,
                      ncol=h_sim,
-                     dimnames=list(females=size.class,time=paste("t",1:h_sim,sep=".")))
+                     dimnames=list(females=ID,time=paste("t",1:h_sim,sep=".")))
   # Batch 1 data
-  ov_SC <- ov_empty # Batch1 spawning capability (1=yes, 0=no)
+  ov_SC <- ov_empty      # Batch1 spawning capability (1=yes, 0=no)
   ov_SI_age <- ov_empty  # Batch1 age
-  ov_SI_type <- ov_empty  # Batch1 structure type (1=HO, 2=PF)
-  ov_HO <- ov_empty # Batch1 HO age (in hours)
-  ov_PF <- ov_empty # Batch1 PF age (in hours)
-  ov_fb <- ov_empty # Batch1 batch fecundity (i.e. number of HO)
-  ov_sp <- ov_empty    # Spawns (i.e. spawning events): record the moment a batch is spawned
+  ov_SI_type <- ov_empty # Batch1 structure type (1=HO, 2=PF)
+  ov_HO <- ov_empty      # Batch1 HO age (in hours)
+  ov_PF <- ov_empty      # Batch1 PF age (in hours)
+  ov_fb <- ov_empty      # Batch1 batch fecundity (i.e. number of HO)
+  ov_sp <- ov_empty      # Spawns (i.e. spawning events): record the moment a batch is spawned
 
   # Data events occurring in the population, where there is a row for each
   # female size group for each event
 
   # Hour at which HO appeared
-  D.pop.HO=data.frame("POSIX.t"=as.POSIXct(0,origin="1970-01-01",tz="UTC"),
+  data_pop_HO=data.frame("POSIX.t"=as.POSIXct(0,origin="1970-01-01",tz="UTC"),
                       "Lbin"=as.integer(0),"HO"=as.integer(0))
-  D.pop.HO=D.pop.HO[0,]    # Clears that first stupid row that I had to add to appease POSIXct
+  data_pop_HO=data_pop_HO[0,]    # Clears that first stupid row that I had to add to appease POSIXct
 
   # Hour at which a spawn occurred (i.e. POF appeared)
-  D.pop.Bs=data.frame("POSIX.t"=as.POSIXct(0,origin="1970-01-01",tz="UTC"),
+  data_pop_Bs=data.frame("POSIX.t"=as.POSIXct(0,origin="1970-01-01",tz="UTC"),
                       "Lbin"=as.integer(0),"Bs"=as.integer(0),
                       "BI"=as.integer(0), # Duration of batch interval following a spawning event
                       "fb"=as.numeric(0), # Batch fecundity
                       "d_PF"=as.integer(0)) # Actual post-ovulatory follicle duration
-  D.pop.Bs=D.pop.Bs[0,]    # Clears that first stupid row that I had to add to appease POSIXct
+  data_pop_Bs=data_pop_Bs[0,]    # Clears that first stupid row that I had to add to appease POSIXct
 
   # Summary data vectors
-  t.Pd0=rep(0,n_Lbin)     # First hour of spawning period
-  t.Pd1=rep(0,n_Lbin)     # Last hour of spawning period
-  date.Pd0=rep(NA,n_Lbin)  # First date of spawning period
-  date.Pd1=rep(NA,n_Lbin)  # Last date of spawning period
-  t.SC0=rep(0,n_Lbin)     # First hour of spawning capable period
-  t.SC1=rep(0,n_Lbin)     # Last hour of spawning capable period
+  t_Pd_beg=rep(0,n_Lbin)     # First hour of spawning period
+  t_Pd_end=rep(0,n_Lbin)     # Last hour of spawning period
+  date_Pd_beg=rep(NA,n_Lbin)  # First date of spawning period
+  date_Pd_end=rep(NA,n_Lbin)  # Last date of spawning period
+  t_SC_beg=rep(0,n_Lbin)     # First hour of spawning capable period
+  t_SC_end=rep(0,n_Lbin)     # Last hour of spawning capable period
   Ds =rep(0,n_Lbin)    # Duration of spawning period
   Ps=   rep(0,n_Lbin)  # Spawning fraction
   BI=   rep(0,n_Lbin)  # Batch interval
@@ -207,44 +206,44 @@ sim_spawn <- function(d_sim=365,
   fa=   rep(0,n_Lbin)  # Annual fecundity
 
   # Summary data frame
-  D.pop.par=data.frame(cbind(a_f,Lbin,W.f,fm,date.Pd0,date.Pd1,Ds,Ps,BI,nb,fb,fa))
+  data_pop_par=data.frame(cbind(a_f,Lbin,W.f,fm,date_Pd_beg,date_Pd_end,Ds,Ps,BI,nb,fb,fa))
 
 
 ##### SPAWNER MODEL ####
 
   #--Error density data frames (to keep out of for loop)
-  D.t.Sn0 <-    dtnorm2(mean=j.mn.SI, sd=j.sd.SI)                                # Time of first batch
-  D.t.sp <- dtnorm2(mean=h.mn.spn, sd=h.sd.spn)                              # Time of spawning (i.e. POF appearance)
-  D.t.HO <-  data.frame(x=D.t.sp[,"x"]-round(d.mn.HO),y=D.t.sp[,"y"]) # Time of HO appearance
+  D.t_Sn_beg <-    dtnorm2(mean=doy_SI_mn, sd=doy_SI_sd)               # time of first batch
+  D.t.sp <- dtnorm2(mean=h_spn_mn, sd=h_spn_sd)                        # time of spawning (i.e. POF appearance)
+  D.t.HO <-  data.frame(x=D.t.sp[,"x"]-round(dh_HO_mn),y=D.t.sp[,"y"]) # time of HO appearance
 
   #-- Calculate values for each mature female size-class at each time step
   # #@@@@@ BEGIN FEMALE SIZE CLASS LOOP @@@@@@@@@@@@@@@@@@@@@@@
   for(i in which(Lbin>=L50)) { # For each mature female size class calculate..
-    # Time at midnight nearest to spawning of the first batch (in simulation time)
-    if(first_batch_error){t_sp1_i=sample(x=D.t.Sn0$x,size=1,replace=TRUE,prob=D.t.Sn0$y)*24 + 1
-    }else{t_sp1_i=j.mn.SI*24+1}
+    # time at midnight nearest to spawning of the first batch (in simulation time)
+    if(first_batch_error){t_sp1_i=sample(x=D.t_Sn_beg$x,size=1,replace=TRUE,prob=D.t_Sn_beg$y)*24 + 1
+    }else{t_sp1_i=doy_SI_mn*24+1}
     # my.set.seed(iter=iter.i+1) # Reset random seed
 
-    # Time at midnight nearest to spawning of the last batch (in simulation time)
-    t.Sn1.i= t_sp1_i + d.mn.Sn*24 + 1
+    # time at midnight nearest to spawning of the last batch (in simulation time)
+    t_Sn_end.i= t_sp1_i + dd_Sn_mn*24 + 1
     #@@@@@ BEGIN TIME STEP LOOP @@@@@@@@@@@@@@@@@@@@@@@@@@@
     j <- 0
     # While the time to initiate the next batch is less than the time of the end of the spawning season..
-    while(t_sp1_i<t.Sn1.i) {
+    while(t_sp1_i<t_Sn_end.i) {
     j <- j+1
       t_sp1_i=as.integer(t_sp1_i)                                                         # Convert t_sp1_i to integer
       if(diel_spawn_error){
-        t_sp_ij <- t_sp1_i+sample(x=D.t.sp$x,size=1,replace=TRUE,prob=D.t.sp$y)  # Time of simulation that a batch is spawned
+        t_sp_ij <- t_sp1_i+sample(x=D.t.sp$x,size=1,replace=TRUE,prob=D.t.sp$y)  # time of simulation that a batch is spawned
       }else{
-        t_sp_ij <- t_sp1_i+round(h.mn.spn)
+        t_sp_ij <- t_sp1_i+round(h_spn_mn)
       }
 
-      t_HO <- t_sp_ij-d.mn.HO            # Time of simulation that a batch is initiated (i.e. HO appear)
-      d.B1.HO <- d.mn.HO                    # Duration of HO stage        (hours; fixed)
+      t_HO <- t_sp_ij-dh_HO_mn            # time of simulation that a batch is initiated (i.e. HO appear)
+      d.B1.HO <- dh_HO_mn                 # Duration of HO stage        (hours; fixed)
       d_PF <- if(POF_TempDep){
         # POF duration for current batch as a function of water temperature based on empirical water temp data
         D.Buoy$d.PF[match(floor((t_sp_ij-1)/24),D.Buoy$Date.j)] # hours; temperature dependent
-      }else{d.mn.PF}                                           # hours; fixed
+      }else{dh_PF_mn}                                           # hours; fixed
 
 
 
@@ -253,22 +252,20 @@ sim_spawn <- function(d_sim=365,
       # Batch fecundity of current batch
       # Mean batch fecundity based on body size
       if(nm_fn_fb=="pow3"){
-        fb.mean <- fn_fb(x=Lbin[i], fb.a, fb.b, fb.c)
+        fb_mean <- fn_fb(x=Lbin[i], fb_a, fb_b, fb_c)
       }else{
-        fb.mean <- fn_fb(x=Lbin[i], fb.a, fb.b)
+        fb_mean <- fn_fb(x=Lbin[i], fb_a, fb_b)
       }
 
-      fb.i <- fb.mean # NOTE: This used to be round(fb.mean), since you can't have a fraction
+      fb_i <- fb_mean # NOTE: This used to be round(fb_mean), since you can't have a fraction
       # of an egg, but I removed the rounding because when you fit a model
       # to the simulated data, if it is rounded you get very slightly different
       # model parameters. This is probably not necessary, but I want to assure
       # that the perfect model is really perfect.
       # Add error if desired
       if(fb_size_error){
-        fb.i= rnbinom(n=1,mu=fb.mean,size=fb.k)
+        fb_i= rnbinom(n=1,mu=fb_mean,size=fb_k)
       }
-
-
 
       # Duration of batch interval
       d.B1.BI= local({
@@ -277,7 +274,7 @@ sim_spawn <- function(d_sim=365,
           # Conduct Monte-Carlo draws from fitted parameters, incorporating covariance structure
           # Draw parameter values from multivariate normal distribution
           pars <- local({
-            pars_mean <- c("m"=Ps.m,"s"=Ps.s,"a"=Ps.a,"f"=Ps.f)
+            pars_mean <- c("m"=Ps_m,"s"=Ps_s,"a"=Ps_a,"f"=Ps_f)
             pars <- tmvtnorm::rtmvnorm(n=1,
                                        mean=  pars_mean,
                                        sigma= covmat_lgs_msaf,
@@ -287,13 +284,13 @@ sim_spawn <- function(d_sim=365,
             as.data.frame(round(pars,4))
           })
 
-        }else{pars=data.frame("m"=Ps.m,"s"=Ps.s,"a"=Ps.a,"f"=Ps.f)}
+        }else{pars=data.frame("m"=Ps_m,"s"=Ps_s,"a"=Ps_a,"f"=Ps_f)}
         P=lgs_msaf(m=pars$m, s=pars$s, a=pars$a, f=pars$f, x=Lbin[i]) # Calculate predicted probabilities at length
         if(BI_size_independent){  # Override P if batch interval is set to be size-independent
-          P=Ps.mn}
-        P=pmin(SI_cf*P,1) # Note that SI_cf is used to scale P based on empirical data, therefore
+          P=Ps_mn}
+        P=pmin(cf_SI*P,1) # Note that cf_SI is used to scale P based on empirical data, therefore
         # the durations that HO and POF are set to in the simulation do not
-        # actually affect the setting of SI_cf
+        # actually affect the setting of cf_SI
         I=round((1/P)*24) # Convert to hours and round to nearest hour
         return(I)
       })
@@ -311,7 +308,7 @@ sim_spawn <- function(d_sim=365,
         # Record HO age
         ov_HO[i,b]=b-min(b)+1
         # Record batch fecundity
-        ov_fb[i,b]=fb.i                                  # Record batch fecundity from initiation up to spawning
+        ov_fb[i,b]=fb_i                                  # Record batch fecundity from initiation up to spawning
         rm(b)
 
       }
@@ -319,7 +316,7 @@ sim_spawn <- function(d_sim=365,
       if(t_sp_ij<h_sim){
         # Record PF presence
         b=local({a=c(t_sp_ij:(t_sp_ij+d_PF-1)); a[a<h_sim]}) # Vector indices restricted to simulation time
-        ov_SI_type[i,b]=2 ; rm(b)                                    # Set structure type to 2 (PF) from spawning up to PFs disappear
+        ov_SI_type[i,b]=2 ; rm(b)                            # Set structure type to 2 (PF) from spawning up to PFs disappear
 
         # Record PF age
         b=local({a=c(t_sp_ij:(t_sp_ij+d_PF-1)); a[a<h_sim]}) # Vector indices restricted to simulation time
@@ -329,20 +326,20 @@ sim_spawn <- function(d_sim=365,
         ov_sp[i,t_sp_ij]=1
       }
 
-      # Add data to D.pop.HO as spawns occur
-      D.pop.HO.row=nrow(D.pop.HO)+1                      # Determine the next row of D.pop.HO
-      D.pop.HO[D.pop.HO.row,"POSIX.t"]=POSIX.t[t_HO]  # Add POSIX.t
-      D.pop.HO[D.pop.HO.row,"Lbin"]=Lbin[i]                # Add Lbin
-      D.pop.HO[D.pop.HO.row,"HO"]=1                      # Add HO
+      # Add data to data_pop_HO as spawns occur
+      data_pop_HO.row=nrow(data_pop_HO)+1                      # Determine the next row of data_pop_HO
+      data_pop_HO[data_pop_HO.row,"POSIX.t"]=POSIX.t[t_HO]  # Add POSIX.t
+      data_pop_HO[data_pop_HO.row,"Lbin"]=Lbin[i]                # Add Lbin
+      data_pop_HO[data_pop_HO.row,"HO"]=1                      # Add HO
 
-      # Add data to D.pop.Bs as spawns occur
-      D.pop.Bs.row=nrow(D.pop.Bs)+1                      # Determine the next row of D.pop.Bs
-      D.pop.Bs[D.pop.Bs.row,"POSIX.t"]=POSIX.t[t_sp_ij] # Add POSIX.t
-      D.pop.Bs[D.pop.Bs.row,"Lbin"]=Lbin[i]                # Add Lbin
-      D.pop.Bs[D.pop.Bs.row,"Bs"]=1                      # Add Bs
-      D.pop.Bs[D.pop.Bs.row,"BI"]=d.B1.BI                # Add BI
-      D.pop.Bs[D.pop.Bs.row,"fb"]=fb.i                   # Add fb
-      D.pop.Bs[D.pop.Bs.row,"d_PF"]=d_PF           # Add d_PF
+      # Add data to data_pop_Bs as spawns occur
+      data_pop_Bs.row=nrow(data_pop_Bs)+1                      # Determine the next row of data_pop_Bs
+      data_pop_Bs[data_pop_Bs.row,"POSIX.t"]=POSIX.t[t_sp_ij] # Add POSIX.t
+      data_pop_Bs[data_pop_Bs.row,"Lbin"]=Lbin[i]                # Add Lbin
+      data_pop_Bs[data_pop_Bs.row,"Bs"]=1                      # Add Bs
+      data_pop_Bs[data_pop_Bs.row,"BI"]=d.B1.BI                # Add BI
+      data_pop_Bs[data_pop_Bs.row,"fb"]=fb_i                   # Add fb
+      data_pop_Bs[data_pop_Bs.row,"d_PF"]=d_PF           # Add d_PF
 
       # Recalculate t_sp1_i (a little clunky)
       # Determine the date that this recent spawn occurred on to restrict the model
@@ -364,31 +361,31 @@ sim_spawn <- function(d_sim=365,
       })
     } #@@@@@ END TIME STEP LOOP @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-    D.pop.Bs$POSIX.t=as.POSIXct(D.pop.Bs$POSIX.t,origin="1970-01-01",tz="UTC")
+    data_pop_Bs$POSIX.t=as.POSIXct(data_pop_Bs$POSIX.t,origin="1970-01-01",tz="UTC")
 
 
     # First and last simulation hour of the spawning period
-    t.Pd0[i]=min(which(ov_sp[i,]==1))
-    t.Pd1[i]=max(which(ov_sp[i,]==1))
+    t_Pd_beg[i]=min(which(ov_sp[i,]==1))
+    t_Pd_end[i]=max(which(ov_sp[i,]==1))
 
     # First and last date of the spawning period
-    date.Pd0[i]=as.Date(format(POSIX.t[t.Pd0[i]],"%Y-%m-%d"))
-    date.Pd1[i]=as.Date(format(POSIX.t[t.Pd1[i]],"%Y-%m-%d"))
+    date_Pd_beg[i]=as.Date(format(POSIX.t[t_Pd_beg[i]],"%Y-%m-%d"))
+    date_Pd_end[i]=as.Date(format(POSIX.t[t_Pd_end[i]],"%Y-%m-%d"))
 
     # First and last simulation hour of the spawning capable period
     # Calculate first hour an HO is present, then determine the first hour (0:00h) of that day
     # (i.e. assume that the female has been capable of spawning the entire day that you first observe
     #  an HO. This is a simplifying assumption that should have minimal effect on calculations)
-    t.SC0[i]=floorf(min(which(ov_HO[i,]>0)),24)+1
+    t_SC_beg[i]=floorf(min(which(ov_HO[i,]>0)),24)+1
     # Calculate last hour a POF is present, then determine the last hour (23:00h) of that day
     # (i.e. assume that the female is capable of spawning the entire day that you last observe
     #  a POF. This is a simplifying assumption that should have minimal effect on calculations)
-    t.SC1[i]=ceilingf(max(which(ov_PF[i,]>0)),24)
+    t_SC_end[i]=ceilingf(max(which(ov_PF[i,]>0)),24)
 
     # Record spawning capability data
-    ov_SC[i,c(t.SC0[i]:t.SC1[i])]=1
+    ov_SC[i,c(t_SC_beg[i]:t_SC_end[i])]=1
 
-    # Vector of batches by Julian day
+    # Vector of batches by day of year
     Bs.d=as.numeric(tapply(X=ov_sp[i,],INDEX=ord.day,FUN=sum)) # Batches spawned per day
     # Endpoints of the true spawning period (NOTE: Estimates of spawning periods are based on HO or
     #   POF while these estimates are based on actual spawning events)
@@ -404,16 +401,16 @@ sim_spawn <- function(d_sim=365,
     # But for now, I'm going to keep the standard calculation, since that's what
     # everyone is familiar with.
     Ps[i]=sum(Bs.d[Bs.d0:Bs.d1])/(Bs.d1-Bs.d0+1)    # Spawning fraction
-    Ds[i]=as.numeric(date.Pd1[i]-date.Pd0[i])+1     # Spawning period duration
+    Ds[i]=as.numeric(date_Pd_end[i]-date_Pd_beg[i])+1     # Spawning period duration
     nb[i]=sum(ov_sp[i,])                               # Number of batches
-    fb[i]=exp(mean(log(D.pop.Bs[D.pop.Bs$Lbin==Lbin[i],"fb"]))) # (mean) batch fecundity logged and then back-transformed, since the error is lognormal
-    fa[i]=sum(D.pop.Bs[D.pop.Bs$Lbin==Lbin[i],"fb"])  # Annual fecundity
+    fb[i]=exp(mean(log(data_pop_Bs[data_pop_Bs$Lbin==Lbin[i],"fb"]))) # (mean) batch fecundity logged and then back-transformed, since the error is lognormal
+    fa[i]=sum(data_pop_Bs[data_pop_Bs$Lbin==Lbin[i],"fb"])  # Annual fecundity
   } #@@@@@ END FEMALE SIZE CLASS LOOP @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   # Estimated batch fecundity for population
   mp.pop <- local({
-    x <- D.pop.Bs$Lbin; y <- D.pop.Bs$fb
-    fb.thresh <- min(x)
+    x <- data_pop_Bs$Lbin; y <- data_pop_Bs$fb
+    fb_thresh <- min(x)
 
     if(nm_fn_fb=="lin"){
       mp.pop <- as.numeric(coef(lm(y~x)))
@@ -434,13 +431,13 @@ sim_spawn <- function(d_sim=365,
     if(nm_fn_fb=="pow3"){
       if(fb_size_error){
         mp.pop <- as.numeric(fit_pow3_nbinom(x,y)$par)
-        fb.min <- round(pow3(x=fb.thresh,a=mp.pop[1],b=mp.pop[2],c=mp.pop[3]))
+        fb_min <- round(pow3(x=fb_thresh,a=mp.pop[1],b=mp.pop[2],c=mp.pop[3]))
       }else{
         mp.pop <- as.numeric(fit_pow3_norm(x,y)$par)
-        fb.min <- round(pow3(x=fb.thresh,a=mp.pop[1],b=mp.pop[2],c=mp.pop[3]))
+        fb_min <- round(pow3(x=fb_thresh,a=mp.pop[1],b=mp.pop[2],c=mp.pop[3]))
       }
-      mp.pop[4] <- fb.thresh
-      mp.pop[5] <- fb.min
+      mp.pop[4] <- fb_thresh
+      mp.pop[5] <- fb_min
     }
     return(mp.pop)
   })
@@ -452,61 +449,61 @@ sim_spawn <- function(d_sim=365,
       fb <- c(rep(0,length(Lbin_imm)),fn_fb(Lbin_mat, mp.pop[1], mp.pop[2]))
     }
 
-  # Sort D.pop.Bs by POSIX.t (i.e. put the spawn data in chronological order)
-  D.pop.Bs <- D.pop.Bs[order(D.pop.Bs$POSIX.t),]
-  # Add columns to D.pop.Bs
-  D.pop.Bs$Date=as.Date(format(D.pop.Bs$POSIX.t,"%Y-%m-%d"))
+  # Sort data_pop_Bs by POSIX.t (i.e. put the spawn data in chronological order)
+  data_pop_Bs <- data_pop_Bs[order(data_pop_Bs$POSIX.t),]
+  # Add columns to data_pop_Bs
+  data_pop_Bs$Date=as.Date(format(data_pop_Bs$POSIX.t,"%Y-%m-%d"))
 
   #-- Compile batch number data for the entire population during the simulation
   # First day of spawning periods
-  D.pop.par[,"date.Pd0"]=as.Date(date.Pd0,origin=as.Date("1970-01-01"))
+  data_pop_par[,"date_Pd_beg"]=as.Date(date_Pd_beg,origin=as.Date("1970-01-01"))
   # Last day of spawning periods
-  D.pop.par[,"date.Pd1"]=as.Date(date.Pd1,origin=as.Date("1970-01-01"))
+  data_pop_par[,"date_Pd_end"]=as.Date(date_Pd_end,origin=as.Date("1970-01-01"))
   # Spawning period duration
-  D.pop.par[,"Ds"]=Ds
+  data_pop_par[,"Ds"]=Ds
   # Spawning fraction
-  D.pop.par[,"Ps"]=Ps
+  data_pop_par[,"Ps"]=Ps
   # Batch interval
-  D.pop.par[which(Ps>0),"BI"]=1/Ps[which(Ps>0)]
+  data_pop_par[which(Ps>0),"BI"]=1/Ps[which(Ps>0)]
   # Number of batches
-  D.pop.par[,"nb"]=nb
+  data_pop_par[,"nb"]=nb
   # (mean) Batch fecundity
-  D.pop.par[,"fb"]=fb
+  data_pop_par[,"fb"]=fb
   # Annual fecundity
-  D.pop.par[,"fa"]=fa
+  data_pop_par[,"fa"]=fa
 
   # Build VERY LARGE data frame where there is a row for each female for each step in the simulation
   # Initialize data frame
-  D.pop=data.frame("t"=rep(t_sim,each=n_Lbin),                                          # Simulation time
-                   "Date"=rep(as.Date(format(POSIX.t[t_sim],"%Y-%m-%d")),each=n_Lbin),  # Date
-                   "Time"=rep(format(POSIX.t[t_sim],"%H:%M"),each=n_Lbin),              # Time (24 hour)
-                   "size.class"=rep(size.class,h_sim),                            # Size class
+  data_pop=data.frame("t"=rep(t_sim,each=n_Lbin),                                          # Simulation time
+                   "date"=rep(as.Date(format(POSIX.t[t_sim],"%Y-%m-%d")),each=n_Lbin),  # date
+                   "time"=rep(format(POSIX.t[t_sim],"%H:%M"),each=n_Lbin),              # time (24 hour)
+                   "ID"=rep(ID,h_sim),                            # Size class
                    "Lbin"=rep(Lbin,h_sim),                                          # Female length
                    "f"=rep(1,h_sim),                                                # Female (0=no, 1=yes; used for counting females when summarizing data)
                    "fm"=rep(fm,h_sim))                                            # Female maturity (0=immature, 1=mature)
   # Add batches spawned
-  D.pop <- add_col(df1=D.pop,
-                    df2=reshape_lite(df=as.data.frame(ov_sp), pattern="t.",names=c("size.class","t","Bs")),
-                    nm_col1="size.class",nm_col2="t",nm_x="Bs")
+  data_pop <- add_col(df1=data_pop,
+                    df2=reshape_lite(df=as.data.frame(ov_sp), pattern="t.",names=c("ID","t","Bs")),
+                    nm_col1="ID",nm_col2="t",nm_x="Bs")
   # Add SC
-  D.pop <- add_col(df1=D.pop,
-                    df2=reshape_lite(df=as.data.frame(ov_SC),pattern="t.",names=c("size.class","t","SC")),
-                    nm_col1="size.class",nm_col2="t",nm_x="SC")
+  data_pop <- add_col(df1=data_pop,
+                    df2=reshape_lite(df=as.data.frame(ov_SC),pattern="t.",names=c("ID","t","SC")),
+                    nm_col1="ID",nm_col2="t",nm_x="SC")
   # Add HO
-  D.pop <- add_col(df1=D.pop,
-                    df2=reshape_lite(df=as.data.frame((ov_HO>0)*1),pattern="t.",names=c("size.class","t","HO")),
-                    nm_col1="size.class",nm_col2="t",nm_x="HO")
+  data_pop <- add_col(df1=data_pop,
+                    df2=reshape_lite(df=as.data.frame((ov_HO>0)*1),pattern="t.",names=c("ID","t","HO")),
+                    nm_col1="ID",nm_col2="t",nm_x="HO")
   # Add PF
-  D.pop <- add_col(df1=D.pop,
-                    df2=reshape_lite(df=as.data.frame((ov_PF>0)*1),pattern="t.",names=c("size.class","t","PF")),
-                    nm_col1="size.class",nm_col2="t",nm_x="PF")
+  data_pop <- add_col(df1=data_pop,
+                    df2=reshape_lite(df=as.data.frame((ov_PF>0)*1),pattern="t.",names=c("ID","t","PF")),
+                    nm_col1="ID",nm_col2="t",nm_x="PF")
 
   # Add column indicating if any spawning indicators were present (i.e. HO and/or PF)
-  D.pop$SI <- pmin(rowSums(D.pop[,c("HO","PF")]),1)
+  data_pop$SI <- pmin(rowSums(data_pop[,c("HO","PF")]),1)
 
   # Sort data
-  o=order(D.pop$t,D.pop$size.class)
-  D.pop=D.pop[o,]
+  o=order(data_pop$t,data_pop$ID)
+  data_pop=data_pop[o,]
 
 
   #-- True prevalence of structures in population at each time step (used in plots)
@@ -516,34 +513,18 @@ sim_spawn <- function(d_sim=365,
   for(i in 1:h_sim) {P.PF[i]=length(ov_PF[,i][ov_PF[,i]>0])/length(ov_PF[,i])}  # Proportion with PF
 
   # True count count data for population at each hour of the simulation
-  ov_HO.PA=(ov_HO>0)*(24/d.mn.HO)  # Convert ov_HO to presence-absence scaled by HO duration
-  ov_PF.PA=(ov_PF>0)*(24/d.mn.PF)  # Convert ov_PF to presence-absence scaled by PF-duration
+  ov_HO.PA=(ov_HO>0)*(24/dh_HO_mn)  # Convert ov_HO to presence-absence scaled by HO duration
+  ov_PF.PA=(ov_PF>0)*(24/dh_PF_mn)  # Convert ov_PF to presence-absence scaled by PF-duration
 
-  # THIS MAY NOT BE NEEDED (2026-06-15)
-  # # Convert data to long-form binary data sets for model fitting
-  # # LB()
-  # #   NOTE: This is a pretty context-specific function.
-  # LB <- function(df,SI,size.classes){
-  #   if(!missing(size.classes)){df=df[size.classes,]}
-  #   df <- reshape_lite(as.data.frame(df),"t.",names=c("size.class","t",SI))
-  #   df$Lbin <- Lbin[as.numeric(sub(pattern="f.",replacement="",x=as.character(head(df$size.class))))]
-  #   df$Date <- as.Date(POSIX.t[df$t])
-  #   df$Date.J <- as.numeric(format(df$Date,"%j"))
-  #   df$month <- format(df$Date,"%m")
-  #   df$week <- format(df$Date,"%w")
-  #   df$week.day1 <- df$Date-as.numeric(format(df$Date,"%w"))
-  #   df$week.day1.J <- as.numeric(format(df$week.day1,"%j"))
-  #   df
-  # }
-  #
-  # # ov_SC
-  # ov_SC.LB=LB(ov_SC,"SC",size.class=which(Lbin%in%Lbin_mat))
-  # # ov_HO
-  # ov_HO.LB=LB((ov_HO>0)*1,"HO",size.class=which(Lbin%in%Lbin_mat))
-  # # ov_PF
-  # ov_PF.LB=LB((ov_PF>0)*1,"PF",size.class=which(Lbin%in%Lbin_mat))
+  data_ov <- array(c(ov_SI_type, ov_SC, ov_HO, ov_PF, ov_fb),
+                   dim=c(dim(ov_empty),5),
+                   dimnames = c(dimnames(ov_empty),list("trait"=c("SI_type","SC","HO","PF","fb")))
+  )
 
   return(
-    list(D.pop.par=D.pop.par, D.pop=D.pop)
+    list(data_pop_par=data_pop_par,
+         data_pop=data_pop,
+         data_ov=data_ov
     )
+  )
 }
